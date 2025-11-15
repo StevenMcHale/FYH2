@@ -1,0 +1,145 @@
+
+{% extends 'main/main.html' %}
+{% block content %}
+
+
+<br>
+<h1>Click & Pop Bubble Game</h1>
+
+<div id="game-container"></div>
+<div id="scoreboard">Score: 0</div>
+<button id="reset-button">Reset Game</button>
+
+<style>
+
+#scoreboard{
+    color: #ffffff;
+}
+
+h1{
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 25px;
+}
+body{
+    background: #0b1e39;
+}
+
+#game-container {
+    position: relative;
+    width: 80vw;
+    height: 60vh;
+    border: 2px solid #2c4a7a;
+    background: #e8f0fb;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    margin: auto; /* only center the game, not the navbar */
+}
+
+.bubble {
+    position: absolute;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.bubble:active {
+    transform: scale(1.3);
+    opacity: 0;
+}
+
+#scoreboard {
+    margin-top: 15px;
+    font-size: 18px;
+    text-align: center;
+}
+
+#reset-button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    background: #2f5fa5;
+    color: white;
+    cursor: pointer;
+    transition: 0.25s;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+</style>
+
+<script>
+const gameContainer = document.getElementById('game-container');
+const scoreboard = document.getElementById('scoreboard');
+const resetButton = document.getElementById('reset-button');
+
+let score = 0;
+let bubbles = [];
+let bubbleInterval;
+
+// Function to generate a random number in a range
+function random(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+// Function to create a bubble
+function createBubble() {
+    const bubble = document.createElement('div');
+    const size = random(30, 70); // size in px
+    const x = random(0, gameContainer.clientWidth - size);
+    const y = random(0, gameContainer.clientHeight - size);
+    const color = `hsl(${random(180, 360)}, 70%, 60%)`;
+
+    bubble.classList.add('bubble');
+    bubble.style.width = `${size}px`;
+    bubble.style.height = `${size}px`;
+    bubble.style.left = `${x}px`;
+    bubble.style.top = `${y}px`;
+    bubble.style.background = color;
+
+    // Click event to pop bubble
+    bubble.addEventListener('click', () => {
+        bubble.remove();
+        score++;
+        scoreboard.textContent = `Score: ${score}`;
+    });
+
+    gameContainer.appendChild(bubble);
+    bubbles.push(bubble);
+
+    // Remove bubble after 5 seconds if not clicked
+    setTimeout(() => {
+        if (gameContainer.contains(bubble)) {
+            bubble.remove();
+            bubbles = bubbles.filter(b => b !== bubble);
+        }
+    }, 5000);
+}
+
+// Start generating bubbles
+function startGame() {
+    bubbleInterval = setInterval(createBubble, 800);
+}
+
+// Reset the game
+function resetGame() {
+    score = 0;
+    scoreboard.textContent = `Score: ${score}`;
+    bubbles.forEach(b => b.remove());
+    bubbles = [];
+}
+
+// Event listeners
+resetButton.addEventListener('click', resetGame);
+
+// Start the game
+startGame();
+</script>
+
+</body>
+</html>
+
+{% endblock %}

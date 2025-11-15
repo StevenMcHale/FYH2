@@ -1,0 +1,79 @@
+{% extends 'main/main.html' %}
+{% load static %}
+
+{% block content %}
+<head>
+    <style>
+        body {
+            background-color: #0a2248;
+        }
+
+        .card.card-body {
+            background-color: #1a2f4f; /* Blue matching other pages */
+            color: #e8f0fb; /* Light text for contrast */
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
+            padding: 30px;
+        }
+
+        .quote {
+            font-style: italic;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #a6c8ff;
+        }
+    </style>
+</head>
+
+<div class="row justify-content-center" style="margin-top: 100px;">
+    <div class="col-md-7">
+        <div class="card card-body text-center">
+
+            <h1>Uni Planner</h1>
+            <h3>A space to organise your life...</h3>
+
+            <hr style="border-color: #315485;">
+
+            <h4>By Steven, Vedant, and Diya</h4>
+
+            <!-- Motivational Quote -->
+            <div class="quote" id="motivation-quote"></div>
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    // Array of motivational quotes
+    const quotes = [
+        "Believe you can and you're halfway there. – Theodore Roosevelt",
+    "Success is not final, failure is not fatal: It is the courage to continue that counts. – Winston Churchill",
+    "Don’t watch the clock; do what it does. Keep going. – Sam Levenson",
+    "Pressure is a privilege. – Jannik Sinner",
+    "Start where you are. Use what you have. Do what you can. – Arthur Ashe",
+    "The secret of getting ahead is getting started. – Mark Twain",
+    "Dream big and dare to fail. – Norman Vaughan",
+    "The harder you work for something, the greater you’ll feel when you achieve it.",
+    "Push yourself, because no one else is going to do it for you.",
+    "Great things never come from comfort zones.",
+    "Don’t stop when you’re tired. Stop when you’re done.",
+    "Little by little, day by day, what is meant for you will find its way.",
+    "Don’t wait for opportunity. Create it.",
+    "Your limitation—it’s only your imagination.",
+    "Sometimes we’re tested not to show our weaknesses, but to discover our strengths.",
+    "Success doesn’t just find you. You have to go out and get it.",
+    "The key to success is to focus on goals, not obstacles.",
+    "Small steps every day lead to big results.",
+    "You don’t have to be great to start, but you have to start to be great.",
+    "Hard work beats talent when talent doesn’t work hard.",
+    "Strive for progress, not perfection."
+    ];
+
+    // Pick a random quote on each page load
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+
+    // Display the quote
+    document.getElementById("motivation-quote").innerText = randomQuote;
+</script>
+
+{% endblock %}

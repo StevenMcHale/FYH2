@@ -1,0 +1,309 @@
+{% extends 'main/main.html' %}
+
+{% block content %}
+
+<html>
+<head>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #0b1e39;
+    color: #e8f0fb;
+  }
+
+  h1 {
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 25px;
+  }
+
+  .planner {
+    display: grid;
+    grid-template-columns: 120px repeat(7, 1fr);
+    border: 2px solid #1f3b66;
+    background: #1a2f4f;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 0 25px rgba(0,0,0,0.45);
+  }
+
+  .planner div {
+    border: 1px solid #2c4a7a;
+    padding: 12px;
+    box-sizing: border-box;
+    text-align: center;
+    color: #e8f0fb;
+  }
+
+  .meal-label {
+    font-weight: bold;
+    background: #2f5fa5;
+    color: white;
+  }
+
+  .day-label {
+    font-weight: bold;
+    background: #2f5fa5;
+    color: white;
+  }
+
+  input, select {
+    width: 90%;
+    padding: 7px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #5c83b8;
+    background: #eef4ff;
+    color: #0b1e39;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: #3c7dd9;
+    box-shadow: 0 0 6px rgba(60,125,217,0.6);
+  }
+
+  #save-button {
+    margin-top: 30px;
+    padding: 12px 26px;
+    font-size: 17px;
+    border: none;
+    border-radius: 8px;
+    background: #2f5fa5;
+    color: white;
+    cursor: pointer;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    transition: 0.25s;
+  }
+
+  #save-button:hover {
+    background: #5a9eff;
+  }
+
+  #grocery-list {
+    max-width: 600px;
+    margin: 30px auto;
+    background: #1a2f4f;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+  }
+
+  #grocery-list ul {
+    text-align: left;
+    padding-left: 20px;
+  }
+
+  #grocery-list li {
+    cursor: pointer;
+    padding: 3px 0;
+    transition: 0.2s;
+  }
+
+  #grocery-list li.checked {
+    text-decoration: line-through;
+    color: #888;
+  }
+
+  @media print {
+    body {
+        background: white !important;
+        color: black !important;
+    }
+    .planner {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+    input {
+        border: 1px solid #000;
+        background: white;
+        color: black;
+    }
+    #save-button, #grocery-list {
+        display: none;
+    }
+}
+</style>
+</head>
+<body>
+<br>
+<h1>Meal Planner</h1>
+
+<datalist id="meal-options">
+  <option value="Pancakes">
+  <option value="Omelette">
+  <option value="Cereal">
+  <option value="Salad">
+  <option value="Sandwich">
+  <option value="Chicken & Rice">
+  <option value="Spaghetti">
+  <option value="Stir Fry">
+  <option value="Soup">
+</datalist>
+
+<div class="planner">
+  <div></div>
+  <div class="day-label">Monday</div>
+  <div class="day-label">Tuesday</div>
+  <div class="day-label">Wednesday</div>
+  <div class="day-label">Thursday</div>
+  <div class="day-label">Friday</div>
+  <div class="day-label">Saturday</div>
+  <div class="day-label">Sunday</div>
+
+  <div class="meal-label">Breakfast</div>
+  <div><input list="meal-options"></div>
+  <div><input list="meal-options"></div>
+  <div><input list="meal-options"></div>
+  <div><input list="meal-options"></div>
+  <div><input list="meal-options"></div>
+  <div><input list="meal-options"></div>
+  <div><input list="meal-options"></div>
+
+  <div class="meal-label">Lunch</div>
+  <div><input list="meal-options"></div>
+  <div><input list="meal-options"></div>
+  <div><input list="meal-options"></div>
+  <div><input list="meal-options"></div>
+  <div><input list="meal-options"></div>
+  <div><input list="meal-options"></div>
+  <div><input list="meal-options"></div>
+
+  <div class="meal-label">Dinner</div>
+  <div><input list="meal-options"></div>
+  <div><input list="meal-options"></div>
+  <div><input list="meal-options"></div>
+  <div><input list="meal-options"></div>
+  <div><input list="meal-options"></div>
+  <div><input list="meal-options"></div>
+  <div><input list="meal-options"></div>
+</div>
+
+<button id="save-button">Save Meals</button>
+
+<h2 style="text-align:center; margin-top: 40px;">Suggested Grocery List</h2>
+<div id="grocery-list">
+  <ul id="grocery-items"></ul>
+</div>
+
+<script>
+const mealIngredients = {
+    "Pancakes": ["Flour", "Eggs", "Milk", "Sugar", "Baking Powder"],
+    "Omelette": ["Eggs", "Cheese", "Milk", "Spinach"],
+    "Cereal": ["Cereal", "Milk"],
+    "Salad": ["Lettuce", "Tomato", "Cucumber", "Olive Oil"],
+    "Sandwich": ["Bread", "Ham", "Cheese", "Lettuce", "Tomato"],
+    "Chicken & Rice": ["Chicken", "Rice", "Spices"],
+    "Spaghetti": ["Spaghetti", "Tomato Sauce", "Cheese"],
+    "Stir Fry": ["Vegetables", "Soy Sauce", "Chicken or Tofu"],
+    "Soup": ["Vegetables", "Stock", "Spices"]
+};
+
+const inputs = document.querySelectorAll("input[list='meal-options']");
+const datalist = document.getElementById("meal-options");
+const groceryUl = document.getElementById("grocery-items");
+
+// Load custom ingredients from localStorage
+let customIngredients = JSON.parse(localStorage.getItem("customIngredients")) || {};
+
+// Generate grocery list
+function generateGroceryList(mealValues) {
+    let ingredientsSet = new Set();
+
+    mealValues.forEach(meal => {
+        if (mealIngredients[meal]) {
+            mealIngredients[meal].forEach(item => ingredientsSet.add(item));
+        } else if (meal.trim() !== "") {
+            // Include custom ingredients if available
+            if (customIngredients[meal]) {
+                customIngredients[meal].forEach(item => ingredientsSet.add(item));
+            } else {
+                ingredientsSet.add(meal + " (add ingredients)");
+            }
+        }
+    });
+
+    groceryUl.innerHTML = "";
+
+    if (ingredientsSet.size === 0) {
+        groceryUl.innerHTML = "<li>No meals added yet.</li>";
+        return;
+    }
+
+    ingredientsSet.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        li.addEventListener("click", () => li.classList.toggle("checked"));
+        groceryUl.appendChild(li);
+    });
+}
+
+// Load saved meals and grocery list
+document.addEventListener("DOMContentLoaded", function () {
+    if (localStorage.getItem("mealGrid")) {
+        const savedMeals = JSON.parse(localStorage.getItem("mealGrid"));
+        inputs.forEach((input, index) => {
+            if (savedMeals[index]) input.value = savedMeals[index];
+        });
+        generateGroceryList(savedMeals);
+    }
+
+    if (localStorage.getItem("mealOptions")) {
+        const savedOptions = JSON.parse(localStorage.getItem("mealOptions"));
+        savedOptions.forEach(meal => {
+            if (!Array.from(datalist.options).some(opt => opt.value === meal)) {
+                const option = document.createElement("option");
+                option.value = meal;
+                datalist.appendChild(option);
+            }
+        });
+    }
+});
+
+// Save meals
+document.getElementById("save-button").addEventListener("click", () => {
+    let mealValues = [];
+    let optionValues = new Set(Array.from(datalist.options).map(opt => opt.value));
+
+    inputs.forEach(input => {
+        const meal = input.value.trim();
+        mealValues.push(meal);
+
+        // Ask for ingredients if it's a new custom meal
+        if (meal !== "" && !mealIngredients[meal] && !customIngredients[meal]) {
+            const ingredientsInput = prompt(`Enter ingredients for "${meal}" separated by commas:`);
+            if (ingredientsInput) {
+                customIngredients[meal] = ingredientsInput.split(",").map(i => i.trim());
+            } else {
+                customIngredients[meal] = [];
+            }
+        }
+
+        // Add new meals to datalist
+        if (meal !== "" && !optionValues.has(meal)) {
+            optionValues.add(meal);
+            const option = document.createElement("option");
+            option.value = meal;
+            datalist.appendChild(option);
+        }
+    });
+
+    localStorage.setItem("mealGrid", JSON.stringify(mealValues));
+    localStorage.setItem("mealOptions", JSON.stringify(Array.from(optionValues)));
+    localStorage.setItem("customIngredients", JSON.stringify(customIngredients));
+
+    alert("Meals saved!");
+    generateGroceryList(mealValues);
+
+    if (confirm("Do you want to print or save your meal planner as a PDF?")) {
+        window.print();
+    }
+});
+</script>
+
+</body>
+</html>
+
+{% endblock %}

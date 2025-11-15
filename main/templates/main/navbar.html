@@ -1,0 +1,45 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{% url 'home' %}">Home</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      {% if user.is_authenticated %}
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'meals' %}">Meals</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'chores' %}">Chores</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'habits' %}">Habits</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'relax' %}">Relax</a>
+        </li>
+      </ul>
+      {% endif %}
+
+      <ul class="navbar-nav ml-auto">
+        {% if user.is_authenticated %}
+          <li class="nav-item">
+            <span class="navbar-text mr-3">Welcome, {{ user.username }}</span>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link btn btn-outline-danger btn-sm" href="{% url 'logout' %}" style="padding: .25rem .5rem;">Logout</a>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'register' %}">Register</a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>

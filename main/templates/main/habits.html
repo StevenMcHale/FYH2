@@ -1,0 +1,171 @@
+{% extends 'main/main.html' %}
+{% block content %}
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #0b1e39;
+  color: #e8f0fb;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  color: white;
+  margin-bottom: 30px;
+}
+
+.habit-tracker {
+  display: grid;
+  grid-template-columns: 220px repeat(7, 1fr) 150px;
+  gap: 6px;
+  width: 95%;
+  max-width: 1100px;
+  margin: auto;
+  background: #1a2f4f;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 0 25px rgba(0,0,0,0.5);
+}
+
+.habit-tracker div {
+  border: 1px solid #3c7dd9;
+  padding: 12px;
+  box-sizing: border-box;
+  text-align: center;
+  border-radius: 6px;
+}
+
+.header-cell {
+  font-weight: bold;
+  background: #34547d;
+  font-size: 16px;
+}
+
+.habit-name {
+  font-weight: bold;
+  text-align: left;
+  background: #34547d;
+  font-size: 15px;
+}
+
+.progress-cell {
+  background: #0a2248;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+}
+
+.progress-bar {
+  width: 100%;
+  max-width: 140px;
+  height: 18px;
+  background: #34547d;
+  border-radius: 9px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar-inner {
+  height: 100%;
+  background: #3c7dd9;
+  width: 0%;
+  border-radius: 9px 0 0 9px;
+  transition: width 0.3s ease-in-out;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+</style>
+<br>
+
+<h1>Habit Tracker</h1>
+
+<div class="habit-tracker" id="habit-tracker"></div>
+
+<script>
+// Habits list
+const habits = ["Drink Water", "Exercise", "Read", "Meditate", "Stretch", "Journal"];
+
+// Load from localStorage
+let habitData = JSON.parse(localStorage.getItem("habitTracker")) || {};
+
+const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+
+function renderHabitTracker() {
+  const container = document.getElementById("habit-tracker");
+  container.innerHTML = "";
+
+  // Header row
+  container.appendChild(createCell("Habit", "header-cell"));
+  days.forEach(day => container.appendChild(createCell(day, "header-cell")));
+  container.appendChild(createCell("Progress", "header-cell"));
+
+  habits.forEach(habit => {
+    container.appendChild(createCell(habit, "habit-name"));
+
+    let completed = 0;
+
+    // Checkboxes
+    days.forEach((day, index) => {
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = habitData[habit]?.[index] || false;
+      if (checkbox.checked) completed++;
+
+      checkbox.addEventListener("change", () => {
+        if (!habitData[habit]) habitData[habit] = Array(7).fill(false);
+        habitData[habit][index] = checkbox.checked;
+        localStorage.setItem("habitTracker", JSON.stringify(habitData));
+        updateProgressBar(habit, progressInner);
+      });
+
+      const cell = document.createElement("div");
+      cell.appendChild(checkbox);
+      container.appendChild(cell);
+    });
+
+    // Progress bar
+    const progressCell = document.createElement("div");
+    progressCell.className = "progress-cell";
+
+    const progressWrapper = document.createElement("div");
+    progressWrapper.className = "progress-bar";
+
+    const progressInner = document.createElement("div");
+    progressInner.className = "progress-bar-inner";
+
+    updateProgressBar(habit, progressInner, completed);
+
+    progressWrapper.appendChild(progressInner);
+    progressCell.appendChild(progressWrapper);
+    container.appendChild(progressCell);
+  });
+}
+
+function createCell(text, className="") {
+  const cell = document.createElement("div");
+  cell.className = className;
+  cell.innerText = text;
+  return cell;
+}
+
+function updateProgressBar(habit, bar, completed=null) {
+  if (completed === null && habit) {
+    completed = habitData[habit]?.filter(v=>v).length || 0;
+  }
+  const percent = (completed/7)*100;
+  bar.style.width = percent + "%";
+}
+
+renderHabitTracker();
+</script>
+
+{% endblock %}

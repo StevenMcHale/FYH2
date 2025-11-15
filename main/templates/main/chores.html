@@ -1,0 +1,260 @@
+{% extends 'main/main.html' %}
+{% block content %}
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #0b1e39;
+    color: #e8f0fb;
+    text-align: center;
+  }
+
+  h1 {
+    color: white;
+    margin-bottom: 15px;
+  }
+
+  #calendar {
+    width: 90%;
+    max-width: 800px;
+    margin: auto;
+    background: #1a2f4f;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+  }
+
+  #calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  button {
+    background: #3c7dd9;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: 0.25s;
+  }
+
+  button:hover {
+    background: #5a9eff;
+  }
+
+  #month-year {
+    font-size: 22px;
+    font-weight: bold;
+  }
+
+  #days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+
+  .day-header {
+    font-weight: bold;
+    padding: 8px;
+  }
+
+  .day {
+    background: #273c5a;
+    height: 90px;
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .day:hover {
+    background: #34547d;
+  }
+
+  .chore-text {
+    font-size: 12px;
+    color: #d8e6ff;
+    margin-top: 4px;
+  }
+
+  /* Popup Modal */
+  #modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #modal-box {
+    background: #1a2f4f;
+    padding: 20px;
+    border-radius: 10px;
+    width: 320px;
+    text-align: center;
+  }
+
+  input {
+    width: 90%;
+    padding: 8px;
+    margin-top: 10px;
+    border-radius: 6px;
+    border: 1px solid #5c83b8;
+  }
+</style>
+
+<br>
+<h1>Chore Calendar</h1>
+
+<div id="calendar">
+  <div id="calendar-header">
+    <button onclick="changeMonth(-1)">← Prev</button>
+    <div id="month-year"></div>
+    <button onclick="changeMonth(1)">Next →</button>
+  </div>
+
+  <div id="days">
+    <div class="day-header">Mon</div>
+    <div class="day-header">Tue</div>
+    <div class="day-header">Wed</div>
+    <div class="day-header">Thu</div>
+    <div class="day-header">Fri</div>
+    <div class="day-header">Sat</div>
+    <div class="day-header">Sun</div>
+  </div>
+</div>
+
+<!-- Popup Modal -->
+<div id="modal">
+  <div id="modal-box">
+    <h3 id="modal-title"></h3>
+    <input type="text" id="chore-input" placeholder="Enter a chore...">
+    <br><br>
+    <button onclick="saveChore()">Save</button>
+    <button style="background:#c0392b;margin-left:10px" onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+// Calendar State
+let currentDate = new Date();
+let selectedDay = null;
+
+// Load from localStorage
+let chores = JSON.parse(localStorage.getItem("choreCalendar")) || {};
+
+function renderCalendar() {
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+
+  document.getElementById("month-year").innerText =
+      currentDate.toLocaleString('default', { month: 'long' }) + " " + year;
+
+  document.querySelectorAll(".day-box").forEach(e => e.remove());
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const offset = (firstDay + 6) % 7;
+
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysDiv = document.getElementById("days");
+
+  for (let i = 0; i < offset; i++) {
+    let empty = document.createElement("div");
+    empty.className = "day-box";
+    daysDiv.appendChild(empty);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    let box = document.createElement("div");
+    box.className = "day day-box";
+    box.onclick = () => openModal(day);
+
+    let choreText = chores[year]?.[month]?.[day] || "";
+    box.innerHTML = `
+      <div>${day}</div>
+      <div class="chore-text">${choreText}</div>
+    `;
+
+    daysDiv.appendChild(box);
+  }
+
+  // Trigger reminders for today
+  triggerTodaysReminders();
+}
+
+function changeMonth(dir) {
+  currentDate.setMonth(currentDate.getMonth() + dir);
+  renderCalendar();
+}
+
+function openModal(day) {
+  selectedDay = day;
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+
+  document.getElementById("modal-title").innerText =
+      `Chore(s) for ${day} ${currentDate.toLocaleString('default', { month: 'long' })}`;
+
+  document.getElementById("chore-input").value =
+      chores[year]?.[month]?.[day] || "";
+
+  document.getElementById("modal").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("modal").style.display = "none";
+}
+
+function saveChore() {
+  const text = document.getElementById("chore-input").value;
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+
+  if (!chores[year]) chores[year] = {};
+  if (!chores[year][month]) chores[year][month] = {};
+
+  chores[year][month][selectedDay] = text;
+
+  localStorage.setItem("choreCalendar", JSON.stringify(chores));
+
+  closeModal();
+  renderCalendar();
+}
+
+// --- Notifications ---
+function triggerTodaysReminders() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const day = now.getDate();
+
+  const todaysChores = chores[year]?.[month]?.[day];
+  if (!todaysChores) return;
+
+  // Ask for permission if needed
+  if (Notification.permission === "default") {
+    Notification.requestPermission();
+  }
+
+  if (Notification.permission === "granted") {
+    new Notification("Today's Chores", {
+      body: todaysChores,
+      icon: "", // Optional: Add an icon URL
+    });
+  }
+}
+
+renderCalendar();
+</script>
+
+{% endblock %}
